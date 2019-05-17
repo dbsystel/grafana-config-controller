@@ -1,0 +1,18 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nc-test
+  annotations:
+    grafana.net/notification-channel: "true"
+    grafana.net/id: "0"
+data:
+  test.json: |-
+    {
+      "name": "test-alerts",
+      "type": "webhook",
+      "isDefault": false,
+      "settings": {
+        "url": "https://localhost"
+      }
+    }

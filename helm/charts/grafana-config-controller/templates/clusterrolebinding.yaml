@@ -1,0 +1,12 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ template "grafana-config-controller.fullname" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "grafana-config-controller.fullname" . }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "grafana-config-controller.fullname" . }}
+    namespace: {{ .Release.Namespace | quote }}
