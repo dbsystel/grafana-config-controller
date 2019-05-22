@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dbsystel/grafana-config-controller/grafana"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/dbsystel/grafana-config-controller/grafana"
 	"k8s.io/api/core/v1"
 )
 
@@ -29,12 +29,12 @@ func (c *Controller) Create(obj interface{}) {
 	isGrafanaDashboards, _ := strconv.ParseBool(dh)
 	isGrafanaDatasource, _ := strconv.ParseBool(ds)
 	isGrafanaNotificationChannel, _ := strconv.ParseBool(nc)
-	grafanaId,_ := strconv.Atoi(id)
-	if  grafanaId == c.g.Id && (isGrafanaDashboards || isGrafanaDatasource || isGrafanaNotificationChannel) {
+	grafanaId, _ := strconv.Atoi(id)
+	if grafanaId == c.g.Id && (isGrafanaDashboards || isGrafanaDatasource || isGrafanaNotificationChannel) {
 		var err error
 		for k, v := range configmapObj.Data {
 			if isGrafanaDatasource {
-				level.Info(c.logger).Log("msg", "Creating datasource: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+				level.Info(c.logger).Log("msg", "Creating datasource: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 				err = c.g.CreateDatasource(strings.NewReader(v))
 			} else if isGrafanaDashboards {
 				if !regexp.MustCompile("^{\\s*\"dashboard\":(\\s*.*)*").MatchString(v) {
@@ -42,22 +42,22 @@ func (c *Controller) Create(obj interface{}) {
 				}
 				fd, _ := configmapObj.Annotations["grafana.net/folder"]
 				v, _ = c.checkFolderId(fd, configmapObj, v)
-				level.Info(c.logger).Log("msg", "Creating dashboard: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+				level.Info(c.logger).Log("msg", "Creating dashboard: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 				err = c.g.CreateDashboard(strings.NewReader(v))
 			} else {
-				level.Info(c.logger).Log("msg", "Creating notification-channel: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+				level.Info(c.logger).Log("msg", "Creating notification-channel: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 				err = c.g.CreateNotificationChannel(strings.NewReader(v))
 			}
 
 			if err != nil {
-				level.Info(c.logger).Log("msg", "Failed to create: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
-                level.Error(c.logger).Log("err", err.Error())
+				level.Info(c.logger).Log("msg", "Failed to create: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+				level.Error(c.logger).Log("err", err.Error())
 			} else {
-				level.Info(c.logger).Log("msg", "Succeeded: Created: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+				level.Info(c.logger).Log("msg", "Succeeded: Created: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 			}
 		}
 	} else {
-		level.Debug(c.logger).Log("msg", "Skipping configmap: " + configmapObj.Name)
+		level.Debug(c.logger).Log("msg", "Skipping configmap: "+configmapObj.Name)
 	}
 }
 
@@ -67,15 +67,15 @@ func (c *Controller) Update(oldobj interface{}, newobj interface{}) {
 	id, _ := configmapObj.Annotations["grafana.net/id"]
 	ds, _ := configmapObj.Annotations["grafana.net/datasource"]
 	nc, _ := configmapObj.Annotations["grafana.net/notification-channel"]
-	grafanaId,_ := strconv.Atoi(id)
+	grafanaId, _ := strconv.Atoi(id)
 	isGrafanaDatasource, _ := strconv.ParseBool(ds)
 	isGrafanaNotificationChannel, _ := strconv.ParseBool(nc)
 	if noDifference(oldobj.(*v1.ConfigMap), configmapObj) {
-		level.Debug(c.logger).Log("msg", "Skipping automatically updated configmap:" + configmapObj.Name)
+		level.Debug(c.logger).Log("msg", "Skipping automatically updated configmap:"+configmapObj.Name)
 		return
 	}
 	if grafanaId != c.g.Id {
-		level.Debug(c.logger).Log("msg", "Skipping configmap:" + configmapObj.Name)
+		level.Debug(c.logger).Log("msg", "Skipping configmap:"+configmapObj.Name)
 		return
 	}
 	if isGrafanaNotificationChannel {
@@ -98,19 +98,19 @@ func (c *Controller) Delete(obj interface{}) {
 	isGrafanaDashboards, _ := strconv.ParseBool(dh)
 	isGrafanaDatasource, _ := strconv.ParseBool(ds)
 	isGrafanaNotificationChannel, _ := strconv.ParseBool(nc)
-	grafanaId,_ := strconv.Atoi(id)
+	grafanaId, _ := strconv.Atoi(id)
 
-	if grafanaId == c.g.Id && (isGrafanaDashboards || isGrafanaDatasource || isGrafanaNotificationChannel){
+	if grafanaId == c.g.Id && (isGrafanaDashboards || isGrafanaDatasource || isGrafanaNotificationChannel) {
 		var err error
 		for k, v := range configmapObj.Data {
 			if isGrafanaDatasource {
-				level.Info(c.logger).Log("msg", "Deleting datasource: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+				level.Info(c.logger).Log("msg", "Deleting datasource: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 				err = c.g.DeleteDatasource(strings.NewReader(v))
-			} else if isGrafanaDashboards{
+			} else if isGrafanaDashboards {
 				if !regexp.MustCompile("\\{\\s*\"dashboard\":").MatchString(v) {
 					v = "{\n  \"dashboard\":\n    " + strings.TrimSpace(v) + ",\n  \"overwrite\": true\n}"
 				}
-				level.Info(c.logger).Log("msg", "Deleting dashboard: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+				level.Info(c.logger).Log("msg", "Deleting dashboard: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 				gd, _ := c.g.SearchDashboard()
 				fd, _ := configmapObj.Annotations["grafana.net/folder"]
 				v, _ := c.checkFolderId(fd, configmapObj, v)
@@ -118,9 +118,9 @@ func (c *Controller) Delete(obj interface{}) {
 				level.Debug(c.logger).Log("uid", uid)
 				err = c.g.DeleteDashboard(uid)
 			} else {
-				level.Info(c.logger).Log("msg", "Deleting notification channel: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+				level.Info(c.logger).Log("msg", "Deleting notification channel: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 				ans, _ := c.g.SearchNotificationChannel()
-				an := c.lookUpId(ans,strings.NewReader(v))
+				an := c.lookUpId(ans, strings.NewReader(v))
 				if int(an["id"].(float64)) != -1 {
 					err = c.g.DeleteNotificationChannel(int(an["id"].(float64)))
 				} else {
@@ -128,14 +128,14 @@ func (c *Controller) Delete(obj interface{}) {
 				}
 			}
 			if err != nil {
-				level.Info(c.logger).Log("msg", "Failed to delete: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+				level.Info(c.logger).Log("msg", "Failed to delete: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 				level.Error(c.logger).Log("err", err.Error())
 			} else {
-				level.Info(c.logger).Log("msg", "Succeeded: Deleted: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
-		    }
+				level.Info(c.logger).Log("msg", "Succeeded: Deleted: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+			}
 		}
 	} else {
-		level.Debug(c.logger).Log("msg", "Skipping configmap:" + configmapObj.Name)
+		level.Debug(c.logger).Log("msg", "Skipping configmap:"+configmapObj.Name)
 	}
 }
 
@@ -165,7 +165,7 @@ func (c *Controller) checkFolderId(fd string, configmapObj *v1.ConfigMap, v stri
 
 		err := json.Unmarshal([]byte(v), &m)
 		if err != nil {
-			level.Error(c.logger).Log("msg", "Format error in dashboard: " + v, "err", err.Error())
+			level.Error(c.logger).Log("msg", "Format error in dashboard: "+v, "err", err.Error())
 		}
 
 		m["folderID"] = fid
@@ -173,7 +173,7 @@ func (c *Controller) checkFolderId(fd string, configmapObj *v1.ConfigMap, v stri
 		byte_v, err := json.Marshal(m)
 
 		if err != nil {
-			level.Error(c.logger).Log("msg", "Format error in dashboard: " + v, "err", err.Error())
+			level.Error(c.logger).Log("msg", "Format error in dashboard: "+v, "err", err.Error())
 		}
 
 		v = string(byte_v)
@@ -186,13 +186,13 @@ func (c *Controller) searchFolder(title string) int {
 	fdJson := "{\"title\":\"" + title + "\"}"
 	fid := getFolderId(c, fdJson)
 	if fid == -1 {
-		level.Info(c.logger).Log("msg", "Creating folder: " + title)
+		level.Info(c.logger).Log("msg", "Creating folder: "+title)
 		err := c.g.CreateFolder(strings.NewReader(fdJson))
 		if err != nil {
-			level.Info(c.logger).Log("msg", "Failed to create folder: " + title)
+			level.Info(c.logger).Log("msg", "Failed to create folder: "+title)
 			level.Error(c.logger).Log("err", err.Error())
 		} else {
-			level.Info(c.logger).Log("msg", "Created folder: " + title)
+			level.Info(c.logger).Log("msg", "Created folder: "+title)
 		}
 		fid = getFolderId(c, fdJson)
 	}
@@ -212,7 +212,7 @@ func noDifference(newConfigMap *v1.ConfigMap, oldConfigMap *v1.ConfigMap) bool {
 		return false
 	}
 	for k, v := range newConfigMap.Data {
-		if v != oldConfigMap.Data[k]{
+		if v != oldConfigMap.Data[k] {
 			return false
 		}
 	}
@@ -231,9 +231,9 @@ func noDifference(newConfigMap *v1.ConfigMap, oldConfigMap *v1.ConfigMap) bool {
 func (c *Controller) updateNotificationChannels(configmapObj *v1.ConfigMap) {
 	var err error
 	for k, v := range configmapObj.Data {
-		level.Info(c.logger).Log("msg", "Updating notification channel: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+		level.Info(c.logger).Log("msg", "Updating notification channel: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 		an, _ := c.g.SearchNotificationChannel()
-		newNC := c.lookUpId(an,strings.NewReader(v))
+		newNC := c.lookUpId(an, strings.NewReader(v))
 		if int(newNC["id"].(float64)) != -1 {
 			nc, _ := json.Marshal(newNC)
 			err = c.g.UpdateNotificationChannel(int(newNC["id"].(float64)), strings.NewReader(string(nc)))
@@ -241,12 +241,12 @@ func (c *Controller) updateNotificationChannels(configmapObj *v1.ConfigMap) {
 			err = errors.New("notification channel not found")
 		}
 		if err != nil {
-			level.Info(c.logger).Log("msg", "Failed to update notification channel: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+			level.Info(c.logger).Log("msg", "Failed to update notification channel: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 			level.Error(c.logger).Log("err", err.Error())
-			level.Debug(c.logger).Log("msg", "Trying to create notification channel: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+			level.Debug(c.logger).Log("msg", "Trying to create notification channel: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 			c.Create(configmapObj)
 		} else {
-			level.Info(c.logger).Log("msg", "Succeeded: Updated: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+			level.Info(c.logger).Log("msg", "Succeeded: Updated: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 		}
 	}
 }
@@ -255,9 +255,9 @@ func (c *Controller) updateNotificationChannels(configmapObj *v1.ConfigMap) {
 func (c *Controller) updateDatasource(configmapObj *v1.ConfigMap) {
 	var err error
 	for k, v := range configmapObj.Data {
-		level.Info(c.logger).Log("msg", "Updating datasource: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+		level.Info(c.logger).Log("msg", "Updating datasource: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 		dss, _ := c.g.SearchDatasource()
-		newDS := c.lookUpId(dss,strings.NewReader(v))
+		newDS := c.lookUpId(dss, strings.NewReader(v))
 		if int(newDS["id"].(float64)) != -1 {
 			ds, _ := json.Marshal(newDS)
 			err = c.g.UpdateDatasource(int(newDS["id"].(float64)), strings.NewReader(string(ds)))
@@ -265,12 +265,12 @@ func (c *Controller) updateDatasource(configmapObj *v1.ConfigMap) {
 			err = errors.New("datasource not found")
 		}
 		if err != nil {
-			level.Info(c.logger).Log("msg", "Failed to update datasource: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+			level.Info(c.logger).Log("msg", "Failed to update datasource: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 			level.Error(c.logger).Log("err", err.Error())
-			level.Debug(c.logger).Log("msg", "Trying to create datasource: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+			level.Debug(c.logger).Log("msg", "Trying to create datasource: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 			c.Create(configmapObj)
 		} else {
-			level.Info(c.logger).Log("msg", "Succeeded: Updated: " + k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
+			level.Info(c.logger).Log("msg", "Succeeded: Updated: "+k, "configmap", configmapObj.Name, "namespace", configmapObj.Namespace)
 		}
 	}
 }
@@ -282,9 +282,9 @@ func (c *Controller) lookUpUid(dashboards []grafana.GrafanaDashboard, dashboardJ
 	if err != nil {
 		level.Error(c.logger).Log("err", err.Error())
 	}
-	level.Debug(c.logger).Log("msg", "New dashboard name: " + newDashboard.Dashboard.Title)
-	for _,dh := range dashboards {
-		if dh.Type == "dash-db" && dh.Title == newDashboard.Dashboard.Title && newDashboard.FolderId == dh.FolderId{
+	level.Debug(c.logger).Log("msg", "New dashboard name: "+newDashboard.Dashboard.Title)
+	for _, dh := range dashboards {
+		if dh.Type == "dash-db" && dh.Title == newDashboard.Dashboard.Title && newDashboard.FolderId == dh.FolderId {
 			return dh.Uid
 		}
 	}
@@ -292,14 +292,14 @@ func (c *Controller) lookUpUid(dashboards []grafana.GrafanaDashboard, dashboardJ
 }
 
 // search id of a given notification-channel or folder from a list of them and add the id into the json
-func (c *Controller)lookUpId(objs []map[string]interface{}, objJSON io.Reader) map[string]interface{} {
+func (c *Controller) lookUpId(objs []map[string]interface{}, objJSON io.Reader) map[string]interface{} {
 	newObj := make(map[string]interface{})
 	err := json.NewDecoder(objJSON).Decode(&newObj)
 	if err != nil {
 		level.Error(c.logger).Log("err", err.Error())
 	}
 	if newObj["title"] != nil {
-		for _,obj := range objs {
+		for _, obj := range objs {
 			if obj["title"] == nil {
 				continue
 			}

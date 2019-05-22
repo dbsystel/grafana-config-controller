@@ -26,7 +26,7 @@ Parameter | Description | Default
 --------- | ----------- | -------
 `replicaCount` | The number of pod replicas | `1`
 `image.repository` | grafana-config-controller container image repository | `dockerregistry/devops/grafana-config-controller`
-`image.tag` | grafana-config-controller container image tag | `1.0.0`
+`image.tag` | grafana-config-controller container image tag | `1.1.0`
 `url` | The internal url to access grafana | `http://grafana:3000`
 `id` | The id to specify grafana | `0`
 `logLevel` | The log-level of grafana-config-controller | `info`

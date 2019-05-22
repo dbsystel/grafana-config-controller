@@ -11,15 +11,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-kit/kit/log"
-	"github.com/go-kit/kit/log/level"
+	"github.com/dbsystel/grafana-config-controller/controller"
+	"github.com/dbsystel/grafana-config-controller/grafana"
 	"github.com/dbsystel/kube-controller-dbsystel-go-common/controller/configmap"
 	"github.com/dbsystel/kube-controller-dbsystel-go-common/kubernetes"
 	k8sflag "github.com/dbsystel/kube-controller-dbsystel-go-common/kubernetes/flag"
 	opslog "github.com/dbsystel/kube-controller-dbsystel-go-common/log"
 	logflag "github.com/dbsystel/kube-controller-dbsystel-go-common/log/flag"
-	"github.com/dbsystel/grafana-config-controller/controller"
-	"github.com/dbsystel/grafana-config-controller/grafana"
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/log/level"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -27,7 +27,7 @@ var (
 	app = kingpin.New(filepath.Base(os.Args[0]), "Grafana Controller")
 	//Here you can define more flags for your application
 	grafanaUrl = app.Flag("grafana-url", "The url to issue requests to update dashboards to.").Required().String()
-	id = app.Flag("id", "The grafana id to issue requests to update dashboards to.").Default("0").Int()
+	id         = app.Flag("id", "The grafana id to issue requests to update dashboards to.").Default("0").Int()
 )
 
 func main() {
@@ -65,7 +65,7 @@ func main() {
 
 	gUrl, err := url.Parse(*grafanaUrl)
 	if err != nil {
-		level.Error(logger).Log("msg", "Grafana URL could not be parsed: " + *grafanaUrl)
+		level.Error(logger).Log("msg", "Grafana URL could not be parsed: "+*grafanaUrl)
 		os.Exit(2)
 	}
 
@@ -77,7 +77,7 @@ func main() {
 		gUrl.User = url.UserPassword(os.Getenv("GRAFANA_USER"), os.Getenv("GRAFANA_PASSWORD"))
 	}
 
-	g := grafana.New(gUrl,*id, logger)
+	g := grafana.New(gUrl, *id, logger)
 
 	if os.Getenv("MONITORING_PASSWORD") != "" {
 		createMonitoringUser(g, logger)

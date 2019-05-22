@@ -48,8 +48,8 @@ type GrafanaDashboard struct {
 }
 
 type GrafanaDashboardConfigmap struct {
-	Dashboard  struct{ Title string } `json:"dashboard"`
-	FolderId int    `json:"folderId"`
+	Dashboard struct{ Title string } `json:"dashboard"`
+	FolderId  int                    `json:"folderId"`
 }
 
 // return a list of grafana dashboards
@@ -169,12 +169,10 @@ func (c *APIClient) UpdateDatasource(id int, datasourceJson io.Reader) error {
 	return c.doPut(updateUrl, datasourceJson)
 }
 
-
 func (c *APIClient) UpdateNotificationChannel(id int, notificationChannelJSON io.Reader) error {
 	updateUrl := makeUrl(c.BaseUrl, "/api/alert-notifications/"+strconv.Itoa(id))
 	return c.doPut(updateUrl, notificationChannelJSON)
 }
-
 
 func (c *APIClient) CreateDashboard(dashboardJSON io.Reader) error {
 	return c.doPost(makeUrl(c.BaseUrl, "/api/dashboards/db"), dashboardJSON)
@@ -203,7 +201,7 @@ func (c *APIClient) doPut(url string, dataJSON io.Reader) error {
 	}
 	req.Header.Add("Content-Type", "application/json")
 	if os.Getenv("GRAFANA_BEARER_TOKEN") != "" {
-		req.Header.Add("Authorization", "Bearer " + os.Getenv("GRAFANA_BEARER_TOKEN"))
+		req.Header.Add("Authorization", "Bearer "+os.Getenv("GRAFANA_BEARER_TOKEN"))
 	}
 	return c.doRequest(req)
 }
@@ -216,7 +214,7 @@ func (c *APIClient) doPost(url string, dataJSON io.Reader) error {
 	req.Header.Add("Content-Type", "application/json")
 
 	if os.Getenv("GRAFANA_BEARER_TOKEN") != "" {
-		req.Header.Add("Authorization", "Bearer " + os.Getenv("GRAFANA_BEARER_TOKEN"))
+		req.Header.Add("Authorization", "Bearer "+os.Getenv("GRAFANA_BEARER_TOKEN"))
 	}
 
 	return c.doRequest(req)

@@ -1,2 +1,4 @@
 .idea/*
 bin/*
+scripts/dashboards/*
+scripts/datasources/*
