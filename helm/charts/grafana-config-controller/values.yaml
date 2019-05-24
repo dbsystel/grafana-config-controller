@@ -1,8 +1,0 @@
-image:
-  repository: dockerregistry/devops/grafana-confing-controller
-  tag: 1.1.0
-url: http://grafana:3000
-id: "0"
-logLevel: "info"
-adminPassword: adminpassword
-replicaCount: 1

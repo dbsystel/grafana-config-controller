@@ -1,0 +1,86 @@
+apiVersion: apps/v1beta2
+kind: StatefulSet
+metadata:
+  name: {{ template "grafana.name" . }}
+  namespace: {{ default .Release.Namespace .Values.global.namespace | quote }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "grafana.name" . }}
+  serviceName: {{ template "grafana.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "grafana.name" . }}
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.securityContext.fsGroup }}
+        runAsUser: {{ .Values.securityContext.runAsUser }}
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      containers:
+        - name: {{ template "grafana.name" . }}-core
+          image: "{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: {{ .Values.grafana.resources.limits.cpu }}
+              memory: {{ .Values.grafana.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.grafana.resources.requests.cpu }}
+              memory: {{ .Values.grafana.resources.requests.memory }}
+          env:
+            - name:  GF_SECURITY_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-secret
+                  key: adminpassword
+            - name:  PROMETHEUS_ENDPOINT
+              value: http://prometheus:9090
+{{ if .Values.extraEnv -}}
+{{ toYaml .Values.extraEnv | indent 12 }}
+{{- end }}
+          volumeMounts:
+            - name: grafana-custom-config
+              mountPath: "/etc/grafana"
+            - name: grafana-persistent-storage
+              mountPath: /var/lib/grafana
+        - name: grafana-controller
+          image: "{{ .Values.grafanaController.image.repository }}:{{ .Values.grafanaController.image.tag }}"
+          args:
+            - "--grafana-url={{ .Values.grafanaController.url }}"
+            - "--id={{ .Values.grafanaController.id }}"
+            - "--log-level={{ .Values.grafanaController.logLevel }}"
+          ports:
+            - containerPort: 3001
+              name: http
+              protocol: TCP
+          env:
+            - name: GRAFANA_USER
+              value: admin
+            - name: GRAFANA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-secret
+                  key: adminpassword
+            - name: MONITORING_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-secret
+                  key: monitoringpassword
+      serviceAccountName: grafana
+
+      volumes:
+        - name: grafana-custom-config
+          configMap:
+            name: grafana-custom-config
+  volumeClaimTemplates:
+    - metadata:
+        name: {{ .Values.volumeClaimTemplates.name }}
+      spec:
+        accessModes:
+{{ toYaml .Values.volumeClaimTemplates.accessModes | indent 10 }}
+        resources:
+          requests:
+            storage: {{ .Values.volumeClaimTemplates.requests.storage }}
+

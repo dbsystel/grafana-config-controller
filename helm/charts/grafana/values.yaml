@@ -1,0 +1,72 @@
+# Default values for grafana.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# set global values, e.g. to overwrite the default namespace 
+global: {}
+# global: 
+#   namespace: monitoring 
+
+replicaCount: 1
+
+service:
+  port: 3000
+  path: /metrics
+  scrape: "true"
+
+ingress:
+  enabled: false
+  url: https://grafana.abc.def
+  extraAnnotations: {}
+
+securityContext:
+  fsGroup: 0
+  runAsUser: 0
+terminationGracePeriodSeconds: 10
+
+grafana:
+  image:
+    repository: grafana/grafana
+    tag: 6.1.4
+  resources: 
+    requests:
+      cpu: 1000m
+      memory: 4Gi
+    limits:
+      cpu: 2000m
+      memory: 8Gi
+grafanaController:
+  image:
+    repository: dockerregistry/grafana-config-controller
+    tag: 1.0.0
+  url: http://localhost:3000
+  id: "0"
+  logLevel: "info" 
+
+
+
+extraEnv: []
+
+customconfig:
+  grafanaini: |
+    [auth]
+    # Set to true to disable (hide) the login form, useful if you use OAuth, defaults to false
+    disable_login_form = true
+    [auth.anonymous]
+    # enable anonymous access
+    enabled = true
+
+    # specify organization name that should be used for unauthenticated users
+    org_name = Main Org.
+
+    # specify role for unauthenticated users Viewer, Editor, Admin
+    # org_role = Viewer
+    org_role = Admin
+
+
+volumeClaimTemplates:
+  name: grafana-persistent-storage
+  accessModes: [ "ReadWriteOnce" ]
+  requests:
+    storage: 10Gi
+

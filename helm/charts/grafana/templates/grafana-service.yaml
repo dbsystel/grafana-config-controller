@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "grafana.name" . }}
+  namespace: {{ default .Release.Namespace .Values.global.namespace | quote }}
+  annotations:
+    prometheus.io/scrape: {{ .Values.service.scrape | quote }}
+    prometheus.io/path: {{ .Values.service.path | quote }}
+    prometheus.io/port:  {{ .Values.service.port | quote }}
+
+
+spec:
+  ports:
+  - port: {{ .Values.service.port }}
+    protocol: TCP
+  selector:
+    app: {{ template "grafana.name" . }}

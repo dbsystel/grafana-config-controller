@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-custom-config
+data:
+  grafana.ini: |
+{{ .Values.customconfig.grafanaini | indent 4}}
