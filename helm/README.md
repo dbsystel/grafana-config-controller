@@ -1,9 +1,9 @@
 ### Installing the Chart
 
-To install the chart with the release name `grafanai-config-controller` in namespace `monitoring`:
+To install the chart with the release name `grafana` in namespace `monitoring`:
 
 ```console
-$ helm upgrade grafana-config-controller examples/helm/charts/grafana-config-controller --namespace monitoring --install
+$ helm upgrade grafana helm/charts/grafana --namespace monitoring --install
 ```
 The command deploys grafana-config-controller on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
 
@@ -14,7 +14,7 @@ The command deploys grafana-config-controller on the Kubernetes cluster in the d
 To uninstall/delete the `grafana-config-controller` deployment:
 
 ```console
-$ helm delete grafana-config-controller --purge
+$ helm delete grafana --purge
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
