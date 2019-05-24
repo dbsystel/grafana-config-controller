@@ -46,10 +46,14 @@ Parameter | Description | Default
 `ingress.url` | Grafana ingress host url | ``
 `ingress.extraAnnotations` | Extra annotations for ingress | `{}`
 `service.port` | The port the grafana uses | `3000`
+`service.type` | Specify the service type | `ClusterIP`
 `service.path` | The metrics path grafana uses | `/metrics`
 `service.scrape` | If true, prometheus scrapes grafana metrics | `true`
 `securityContext.fsGroup` | Custom security context for grafana container | `0`
 `securityContext.runAsUser` | Custom user for grafana container | `0`
 `terminationGracePeriodSeconds` | Grafana Pod termination grace period | `10`
-`customconfig.grafanaini` | custom configurated grafana.ini | `<grafana.ini>`
+`customconfig.grafanaini` | Custom configurated grafana.ini | `<grafana.ini>`
+`adminPassword`| Specify password for user: admin | `password`
+`monitoringPassword`| Specify password for user: monitoring (which has only read access) | `password`
+
 

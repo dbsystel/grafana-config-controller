@@ -10,6 +10,7 @@ global: {}
 replicaCount: 1
 
 service:
+  type: ClusterIP
   port: 3000
   path: /metrics
   scrape: "true"
@@ -52,10 +53,10 @@ customconfig:
   grafanaini: |
     [auth]
     # Set to true to disable (hide) the login form, useful if you use OAuth, defaults to false
-    disable_login_form = true
+    disable_login_form = false
     [auth.anonymous]
     # enable anonymous access
-    enabled = true
+    enabled = false
 
     # specify organization name that should be used for unauthenticated users
     org_name = Main Org.
