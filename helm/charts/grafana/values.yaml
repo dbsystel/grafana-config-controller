@@ -43,7 +43,8 @@ grafanaController:
   id: "0"
   logLevel: "info" 
 
-
+adminPassword: password
+monitoringPassword: password
 
 extraEnv: []
 

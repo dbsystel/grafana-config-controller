@@ -31,10 +31,7 @@ spec:
               memory: {{ .Values.grafana.resources.requests.memory }}
           env:
             - name:  GF_SECURITY_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: grafana-secret
-                  key: adminpassword
+              value: {{ .Values.adminPassword }}
             - name:  PROMETHEUS_ENDPOINT
               value: http://prometheus:9090
 {{ if .Values.extraEnv -}}
@@ -59,15 +56,9 @@ spec:
             - name: GRAFANA_USER
               value: admin
             - name: GRAFANA_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: grafana-secret
-                  key: adminpassword
+              value: {{ .Values.adminPassword }}
             - name: MONITORING_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: grafana-secret
-                  key: monitoringpassword
+              value: {{ .Values.monitoringPassword }}
       serviceAccountName: grafana
 
       volumes:
