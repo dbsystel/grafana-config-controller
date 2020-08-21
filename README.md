@@ -53,6 +53,7 @@ Mentioned `"false"` values can be also specified with: `"0", "f", "F", "false", 
 --run-outside-cluster # Uses ~/.kube/config rather than in cluster configuration
 --grafana-url # Sets the URL and authentication to use to access the Grafana API
 --id # Sets the ID, so the Controller knows which ConfigMaps should be watched
+--namespace # Only watch specified namespace
 ```
 
 ## Development
