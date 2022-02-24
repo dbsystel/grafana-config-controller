@@ -1,3 +1,5 @@
+:warning: The project has been archived and is no longer maintained!
+
 # Config Controller for Grafana
 
 This Controller is based on the [Grafana Operator](https://github.com/tsloughter/grafana-operator). 
